@@ -1,0 +1,253 @@
+use std::fs::OpenOptions;
+use std::io::{self, BufRead, Write};
+
+use crate::calc::Calculator;
+use crate::help::show_help;
+use crate::history::{load_history_expr, HistoryPick};
+
+pub fn run() {
+    let mut calc = Calculator::new();
+    println!("Calculadora Avanzada en Rust. Escribe 'help'.");
+
+    // stdin robusto ante bytes no UTF-8
+    let stdin = io::stdin();
+    let mut stdin_lock = stdin.lock();
+
+    loop {
+        let mode_str = if calc.is_radians { "RAD" } else { "DEG" };
+        print!("[{}] >> ", mode_str);
+        io::stdout().flush().unwrap();
+
+        let mut buf: Vec<u8> = Vec::new();
+        match stdin_lock.read_until(b'\n', &mut buf) {
+            Ok(0) => break, // EOF
+            Ok(_) => {}
+            Err(e) => {
+                eprintln!("Error leyendo stdin: {}", e);
+                continue;
+            }
+        }
+
+        let input = String::from_utf8_lossy(&buf);
+        let raw0 = input.trim();
+        if raw0.is_empty() {
+            continue;
+        }
+
+        // Historial interactivo: !! y !N
+        let mut line = raw0.to_string();
+        if line == "!!" {
+            match load_history_expr(&calc.history_file, HistoryPick::Last) {
+                Ok(expr) => {
+                    println!("(hist !!) {}", expr);
+                    line = expr;
+                }
+                Err(e) => {
+                    println!("Error: {}", e);
+                    continue;
+                }
+            }
+        } else if line.starts_with('!')
+            && line.len() > 1
+            && line[1..].chars().all(|c| c.is_ascii_digit())
+        {
+            let n: usize = match line[1..].parse() {
+                Ok(v) => v,
+                Err(_) => {
+                    println!("Error: uso !N donde N es un entero.");
+                    continue;
+                }
+            };
+            match load_history_expr(&calc.history_file, HistoryPick::Index1(n)) {
+                Ok(expr) => {
+                    println!("(hist !{}) {}", n, expr);
+                    line = expr;
+                }
+                Err(e) => {
+                    println!("Error: {}", e);
+                    continue;
+                }
+            }
+        }
+
+        let raw = line.trim();
+
+        match raw {
+            "exit" => break,
+            "help" => show_help(),
+
+            "new" => {
+                calc.reset();
+                println!("Sistema reseteado.");
+            }
+
+            "mode" => {
+                calc.is_radians = !calc.is_radians;
+                println!("Modo: {}", if calc.is_radians { "RAD" } else { "DEG" });
+            }
+
+            "vars" => println!("Vars: {:?}", calc.vars),
+            "mem" => println!("Pila: {:?}", calc.memory_stack),
+
+            // stats en pila
+            "sum" => {
+                if calc.memory_stack.is_empty() {
+                    println!("Pila vacía.");
+                } else {
+                    let v: f64 = calc.memory_stack.iter().sum();
+                    calc.last_result = v;
+                    println!("= {}", v);
+                }
+            }
+            "avg" => {
+                if calc.memory_stack.is_empty() {
+                    println!("Pila vacía.");
+                } else {
+                    let v: f64 = calc.memory_stack.iter().sum::<f64>()
+                        / (calc.memory_stack.len() as f64);
+                    calc.last_result = v;
+                    println!("= {}", v);
+                }
+            }
+            "min" => {
+                if let Some(m) = calc.memory_stack.iter().cloned().reduce(f64::min) {
+                    calc.last_result = m;
+                    println!("= {}", m);
+                } else {
+                    println!("Pila vacía.");
+                }
+            }
+            "max" => {
+                if let Some(m) = calc.memory_stack.iter().cloned().reduce(f64::max) {
+                    calc.last_result = m;
+                    println!("= {}", m);
+                } else {
+                    println!("Pila vacía.");
+                }
+            }
+            "std" => {
+                let n = calc.memory_stack.len();
+                if n == 0 {
+                    println!("Pila vacía.");
+                } else {
+                    let mean = calc.memory_stack.iter().sum::<f64>() / (n as f64);
+                    let var = calc
+                        .memory_stack
+                        .iter()
+                        .map(|x| {
+                            let d = x - mean;
+                            d * d
+                        })
+                        .sum::<f64>()
+                        / (n as f64);
+                    let v = var.sqrt();
+                    calc.last_result = v;
+                    println!("= {}", v);
+                }
+            }
+
+            "clearstack" => {
+                calc.memory_stack.clear();
+                println!("Pila vaciada.");
+            }
+
+            "dup" => match calc.memory_stack.last().copied() {
+                Some(v) => {
+                    calc.memory_stack.push(v);
+                    println!("DUP -> {} (size={})", v, calc.memory_stack.len());
+                }
+                None => println!("Pila vacía."),
+            },
+
+            "swap" => {
+                let n = calc.memory_stack.len();
+                if n < 2 {
+                    println!("Se necesitan al menos 2 valores en la pila.");
+                } else {
+                    calc.memory_stack.swap(n - 1, n - 2);
+                    println!(
+                        "SWAP -> top={} (size={})",
+                        calc.memory_stack[n - 2],
+                        calc.memory_stack.len()
+                    );
+                }
+            }
+
+            "clear" => match std::fs::write(&calc.history_file, b"") {
+                Ok(_) => println!("Historial borrado: {}", calc.history_file),
+                Err(e) => eprintln!("No se pudo borrar {}: {}", calc.history_file, e),
+            },
+
+            "hist" => match std::fs::read(&calc.history_file) {
+                Ok(btes) => print!("{}", String::from_utf8_lossy(&btes)),
+                Err(e) => eprintln!("No se pudo leer {}: {}", calc.history_file, e),
+            },
+
+            "push" => {
+                let v = calc.last_result;
+                calc.memory_stack.push(v);
+                println!("PUSH(last) -> {} (size={})", v, calc.memory_stack.len());
+            }
+
+            s if s.starts_with("push ") => {
+                let rest = s[5..].trim();
+                if rest.is_empty() {
+                    println!("Uso: push <expr> [expr2 ...]");
+                    continue;
+                }
+                let parts: Vec<&str> = rest.split_whitespace().collect();
+                for p in parts {
+                    match calc.evaluate(p) {
+                        Ok(v) => {
+                            calc.memory_stack.push(v);
+                            println!("PUSH -> {} (size={})", v, calc.memory_stack.len());
+                        }
+                        Err(e) => {
+                            println!("Error en '{}': {}", p, e);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            "pop" => match calc.memory_stack.pop() {
+                Some(v) => {
+                    calc.last_result = v;
+                    println!("POP  -> {} (size={})", v, calc.memory_stack.len());
+                }
+                None => println!("Pila vacía."),
+            },
+
+            s if s.starts_with("plot ") => calc.plot(&s[5..]),
+
+            s if s.contains('=') => {
+                let p: Vec<&str> = s.split('=').collect();
+                let var_name = p[0].trim().to_string();
+                match calc.evaluate(p[1]) {
+                    Ok(r) => {
+                        calc.vars.insert(var_name.clone(), r);
+                        println!("{} = {}", var_name, r);
+                    }
+                    Err(e) => println!("Error: {}", e),
+                }
+            }
+
+            _ => match calc.evaluate(raw) {
+                Ok(res) => {
+                    println!("= {}", res);
+
+                    if let Ok(mut file) = OpenOptions::new()
+                        .create(true)
+                        .append(true)
+                        .open(&calc.history_file)
+                    {
+                        if let Err(e) = writeln!(file, "{} = {}", raw, res) {
+                            eprintln!("Error escribiendo en historial: {}", e);
+                        }
+                    }
+                }
+                Err(e) => println!("Error: {}", e),
+            },
+        }
+    }
+}
