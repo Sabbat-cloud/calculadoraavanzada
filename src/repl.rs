@@ -13,7 +13,7 @@ use crate::history::{load_history_expr, HistoryPick};
 
 const CMD_HISTORY_FILE: &str = "historial_cmds.txt";
 
-// Lista de comandos REPL (lo que escribes en la consola)
+// Lista de comandos REPL -consola-
 const COMMANDS: &[&str] = &[
     "help", "exit", "new", "mode", "vars", "mem",
     "sum", "avg", "min", "max", "std",
@@ -22,7 +22,7 @@ const COMMANDS: &[&str] = &[
     "plot",
 ];
 
-// Lista de funciones del parser (las que ya soportas)
+// Lista de funciones del parser -ya soportadas-
 const FUNCS: &[&str] = &[
     "sin","cos","tan","asin","acos","atan","atan2","hypot",
     "sqrt","cbrt","root","log","ln",
@@ -105,7 +105,7 @@ impl Completer for CalcHelper {
             }
         }
 
-        // Autocomplete de funciones (si las escribes tipo "si" -> "sin")
+        // Autocomplete de funciones (si se escriben tipo "si" -> "sin")
         for &f in FUNCS {
             if f.starts_with(prefix) {
                 out.push(Pair {
