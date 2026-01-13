@@ -20,8 +20,9 @@ Historial:
   !!        : Repite última línea del historial            !N       : Repite la línea N del historial (1-index)
   last/ans  : Último valor
 Otros:
-  plot <exprs> [xmin xmax] [ymin ymax]   Ej: plot sin(x);cos(x) -10 10 -2 2
-  mode  : Alterna RAD/DEG       new  : Reset        help/exit  : Ayuda / salir
+  plot <exprs> [xmin xmax] [ymin ymax] [w h]
+        Ej 1: plot sin(x);cos(x) -10 10 -2 2        Ej 2: plot tan(x) -5 5 -5 5 120 40 (Gráfico grande)
+  mode  : Alterna RAD/DEG       new  : Reset        help/"exit","quit","salir"  : Ayuda / salir
 "#
     );
 }

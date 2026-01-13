@@ -98,16 +98,36 @@ Operaciones sobre todos los valores en la pila:
 
 ### Graficación
 ```bash
-plot <expresiones> [xmin xmax] [ymin ymax]
+plot <expresiones> [xmin xmax] [ymin ymax] [ancho alto]
 ```
-- **expresiones**: Separadas por `;` (ej: `sin(x);cos(x)`)
-- **rangos opcionales**: Si se omiten, se usa `-10 10` para X y autoescala para Y
+- **expresiones**: Una o más funciones separadas por ; (ej: sin(x);cos(x)).
+
+- **rangos opcionales**:
+	- xmin xmax: Rango del eje horizontal (por defecto -10 10).
+	- ymin ymax: Rango del eje vertical (por defecto autoescala).
+
+- **dimensiones opcionales**:
+	- ancho alto: Tamaño de la rejilla ASCII en caracteres (por defecto 80 24).
+
+- **Nuevas características visuales*:
+
+	- Marco informativo: El gráfico ahora incluye bordes (┌ ┐, └ ┘) para delimitar el área.
+	- Etiquetas de ejes: Se muestran los valores numéricos de los límites en las esquinas y el valor medio en el eje Y para mejor referencia.
+	- Ejes dinámicos: Los ejes | y - se cruzan con un símbolo + en el origen $(0,0)$.
 
 **Ejemplos:**
 ```
+# Gráfico básico (80x24)
 plot sin(x)
-plot sin(x);cos(x) -5 5 -2 2
-plot x^2 -10 10
+
+# Definir solo el rango X
+plot x^2 -5 5
+
+# Definir rango X, Y y dimensiones de la rejilla (100 columnas por 30 líneas)
+plot sin(x);cos(x) -6.28 6.28 -1.5 1.5 100 30
+
+# Gráfico pequeño "miniatura"
+plot sqrt(x) 0 20 0 5 40 10
 ```
 
 ---

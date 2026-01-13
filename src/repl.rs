@@ -218,7 +218,7 @@ pub fn run() {
         let raw = line2.trim();
 
         match raw {
-            "exit" => break,
+            "exit"|"quit"|"salir" => break,
             "help" => show_help(),
 
             "new" => {
