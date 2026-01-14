@@ -3,6 +3,7 @@
 ## Índice
 - [Descripción General](#descripción-general)
 - [Instalación y Uso](#instalación-y-uso)
+- [Aritmética Compleja](#aritmetica-compleja)
 - [Comandos del REPL](#comandos-del-repl)
 - [Operaciones y Funciones](#operaciones-y-funciones)
 - [Sistema de Variables](#sistema-de-variables)
@@ -18,7 +19,7 @@
 
 ## Descripción General
 
-Calculadora científica avanzada escrita en Rust con soporte para más de 50 funciones matemáticas, sistema de variables, pila de memoria, graficación ASCII y REPL interactivo con autocompletado.
+Calculadora científica avanzada escrita en Rust con un motor basado íntegramente en números complejos (Complex64). Soporta más de 60 funciones matemáticas, sistema de variables, pila de memoria, graficación ASCII y un REPL interactivo con autocompletado inteligente.
 
 **Características principales:**
 - Evaluación de expresiones matemáticas complejas
@@ -58,6 +59,19 @@ Calculadora Avanzada en Rust. Escribe 'help'. (Ctrl+D para salir)
 
 ---
 
+### Aritmética Compleja
+
+La calculadora ahora trata todos los números como complejos.
+
+- `Constante i:` Predefinida como la unidad imaginaria.
+
+- `Entrada:` Puedes usar expresiones como 3 + 2 * i.
+
+- `Salida:` Los resultados se muestran en formato real (= 5) o complejo (= 3 + 2i) según corresponda.
+
+Funciones específicas: * re(z) / im(z): Partes real e imaginaria.
+
+---
 ## Comandos del REPL
 
 ### Comandos Básicos
