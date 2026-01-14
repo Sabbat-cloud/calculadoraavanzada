@@ -1,7 +1,10 @@
 use super::Calculator;
+use num_complex::{Complex64}; // Importación necesaria para manejar complejos
+//use num_complex::{Complex64, ComplexFloat}; // Importación necesaria para manejar complejos
 
 impl Calculator {
     /// plot <exprs> [xmin xmax] [ymin ymax] [width height]
+    /// El gráfico utiliza la parte REAL de los resultados complejos.
     pub fn plot(&mut self, input: &str) {
         let saved_last = self.last_result;
 
@@ -22,8 +25,7 @@ impl Calculator {
         // Intentar extraer dimensiones (width height) si hay suficientes argumentos
         if parts.len() >= 2 {
             if let (Ok(w), Ok(h)) = (parts[parts.len()-2].parse::<usize>(), parts[parts.len()-1].parse::<usize>()) {
-                // Si los dos últimos son enteros, asumimos que son dimensiones
-                if w > 10 && h > 5 { // Mínimo razonable
+                if w > 10 && h > 5 { 
                     width = w;
                     height = h;
                     parts.truncate(parts.len() - 2);
@@ -31,7 +33,7 @@ impl Calculator {
             }
         }
 
-        // Extraer rangos Y (si quedan suficientes argumentos)
+        // Extraer rangos Y
         if parts.len() >= 2 {
             let y1 = parts[parts.len()-2].parse::<f64>();
             let y2 = parts[parts.len()-1].parse::<f64>();
@@ -67,7 +69,7 @@ impl Calculator {
 
         // --- Lógica de Escalado y Generación ---
         
-        // Auto-escala Y si no se proporcionó
+        // Auto-escala Y basada en la parte REAL de la función
         let (y_min, y_max) = if let (Some(y1), Some(y2)) = (y_min_opt, y_max_opt) {
             (y1.min(y2), y1.max(y2))
         } else {
@@ -75,14 +77,16 @@ impl Calculator {
             for &expr in &exprs {
                 for w in 0..width {
                     let x = x_min + (w as f64 / (width - 1) as f64) * (x_max - x_min);
-                    self.vars.insert("x".to_string(), x);
-                    if let Ok(y) = self.evaluate(expr) {
+                    // Insertamos x como un número complejo (parte imaginaria 0)
+                    self.vars.insert("x".to_string(), Complex64::new(x, 0.0));
+                    if let Ok(y_comp) = self.evaluate(expr) {
+                        let y = y_comp.re; // Solo graficamos la parte real
                         if y.is_finite() { y_values.push(y); }
                     }
                 }
             }
             if y_values.is_empty() {
-                println!("Error: No hay valores finitos en este rango.");
+                println!("Error: No hay valores reales finitos en este rango.");
                 return;
             }
             let min = *y_values.iter().min_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
@@ -112,8 +116,9 @@ impl Calculator {
             let sym = symbols[idx % symbols.len()];
             for w in 0..width {
                 let x = x_min + (w as f64 / (width - 1) as f64) * (x_max - x_min);
-                self.vars.insert("x".to_string(), x);
-                if let Ok(y) = self.evaluate(expr) {
+                self.vars.insert("x".to_string(), Complex64::new(x, 0.0));
+                if let Ok(y_comp) = self.evaluate(expr) {
+                    let y = y_comp.re; // Eje Y representa la parte real
                     if y >= y_min && y <= y_max {
                         let row_f = (y - y_min) / y_range * (height as f64 - 1.0);
                         let r = (height as i32 - 1) - row_f.round() as i32;
@@ -126,7 +131,7 @@ impl Calculator {
         }
 
         // --- Renderizado con Etiquetas ---
-        println!("\nPlot: {:?} ({}x{})", exprs, width, height);
+        println!("\nPlot (Parte Real): {:?} ({}x{})", exprs, width, height);
         println!("{:>10} ┌{}┐", format!("{:.2}", y_max), "-".repeat(width));
         for (i, row) in grid.iter().enumerate() {
             let side_label = if i == height / 2 { format!("{:.2}", (y_max + y_min) / 2.0) } else { String::new() };
@@ -136,6 +141,7 @@ impl Calculator {
         println!("{:>11}{}{}", format!("{:.2}", x_min), " ".repeat(width.saturating_sub(10)), format!("{:.2}", x_max));
 
         self.last_result = saved_last;
-        self.vars.remove("x"); // Limpiar variable de control
+        self.vars.remove("x"); 
     }
 }
+

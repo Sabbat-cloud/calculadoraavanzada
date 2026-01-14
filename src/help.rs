@@ -9,6 +9,8 @@ Funciones (2 args):
   atan2(y, x), hypot(x, y), root(n, x), log(base, n), mcd(a,b), mcm(a,b), comb/nCr(n,k), perm/nPr(n,k), pow(base, exp), min(a, b), max(a, b), mod(a,b), rand(min,max), pct(parte, total), applypct(%,val)
 Funciones (3 args):
   r3d(a,b,c), r3i(a,b,c)
+Complejos:
+    abs, arg, conj, re, im
 Pila:
   push <expr> [expr2 ...]       : Evalúa y mete (varios separados por espacios) o sin arg mete 'last'
   pop                           : Saca el último (lo deja en last)

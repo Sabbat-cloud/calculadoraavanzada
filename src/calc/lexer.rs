@@ -68,12 +68,12 @@ impl Calculator {
                             tokens.push(Token::Number(n));
                             last_token_was_op = false;
                         } else {
-                            tokens.push(Token::Number(-1.0));
+                            tokens.push(Token::Number(num_complex::Complex64::new(-1.0, 0.0)));
                             tokens.push(Token::Op('*'));
                             last_token_was_op = true;
                         }
                     } else {
-                        tokens.push(Token::Number(-1.0));
+                        tokens.push(Token::Number(num_complex::Complex64::new(-1.0, 0.0)));
                         tokens.push(Token::Op('*'));
                         last_token_was_op = true;
                     }
@@ -115,7 +115,7 @@ impl Calculator {
                     let funcs = [
                         "sin","cos","tan","asin","acos","atan","atan2","hypot",
                         "sqrt","cbrt","root","log","ln",
-                        "mcd","mcm",
+                        "mcd","mcm","exp","arg","conj","re","im","pow",
                         "floor","ceil","abs","round","trunc","sign",
                         "sinh","cosh","tanh","asinh","acosh","atanh",
                         "deg2rad","rad2deg","cm2in","in2cm","m2ft","ft2m",
