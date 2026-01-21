@@ -50,7 +50,8 @@ cargo run
 ./target/release/calculadora
 ```
 
-La calculadora iniciará en modo REPL interactivo:
+La calculadora iniciará en modo REPL interactivo si no se usan argumentos:
+Acepta: ./calculadora2026 2+2 o ./calculadora2026 "mod(12,14)" por ejemplo.
 ```
 Calculadora Avanzada en Rust. Escribe 'help'. (Ctrl+D para salir)
 [RAD] >> 
