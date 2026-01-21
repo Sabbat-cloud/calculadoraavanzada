@@ -1,0 +1,10 @@
+[package]
+name = "calculadora2026"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+num-integer = "0.1"
+num-complex = "0.4"
+rustyline = "14.0"
+rustyline-derive = "0.10.0"
