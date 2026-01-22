@@ -210,6 +210,11 @@ pub fn run() {
                 } else { println!("Pila vacía."); }
             },
 
+            "author" => {
+                println!("By Oscar Gimenez Blasco.\nhttps://sabbat.cloud\nhttps://github.com/Sabat-cloud");
+            }
+
+
             // --- Otros Comandos ---
             s if s.starts_with("plot ") => {
                 calc.plot(&s[5..]);
