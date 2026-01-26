@@ -69,7 +69,7 @@ Calculadora Avanzada en Rust. Escribe 'help'. (Ctrl+D para salir)
 | `new` | Reinicia el sistema (borra variables, mantiene historial) |
 | `mode` | Alterna entre modo RAD (radianes) y DEG (grados) |
 | `vars` | Muestra todas las variables definidas |
-
+| `ayuda`| Muestra la ayuda de una funcion (ej: `ayuda cos`)
 ### Comandos de Pila
 | Comando | Descripción |
 |---------|-------------|
@@ -203,6 +203,13 @@ Todas aceptan grados o radianes según el modo actual.
 | `in2cm(x)` | Pulgadas → Centímetros | `in2cm(1)` |
 | `m2ft(x)` | Metros → Pies | `m2ft(1)` |
 | `ft2m(x)` | Pies → Metros | `ft2m(3.28084)` |
+
+### Conversión de Bases
+| Función | Descripción | Ejemplo |
+|---------|-------------|---------|
+| `bin(x)` | Muestra valor en binario | `bin(10)` -> 0b1010 |
+| `oct(x)` | Muestra valor en octal | `oct(10)` -> 0o12 |
+| `hex(x)` | Muestra valor en hexadecimal | `hex(255)` -> 0xff |
 
 ### Funciones de Combinatoria
 | Función | Sintaxis | Descripción |

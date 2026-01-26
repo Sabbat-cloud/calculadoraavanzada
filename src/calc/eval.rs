@@ -180,6 +180,30 @@ fn apply_func(vals: &mut Vec<Complex64>, func: &str, is_rad: bool) -> Result<(),
             push_checked(vals, (a * b_val) / c)?
         }
 
+        // --- Conversiones de Base ---
+        "bin" => {
+            let n = safe_i64(b)?;
+            println!("0b{:b}", n); // Imprime en consola el valor binario
+            push_checked(vals, b)?
+        }
+        "oct" => {
+            let n = safe_i64(b)?;
+            println!("0o{:o}", n);
+            push_checked(vals, b)?
+        }
+        "hex" => {
+            let n = safe_i64(b)?;
+            println!("0x{:x}", n);
+            push_checked(vals, b)?
+        }
+        // Para convertir de base a decimal, usaremos 2 argumentos: de_base(base, número_en_esa_base)
+        //"frombase" => {
+        //    let num_str = safe_i64(b)?.to_string();
+        //    let base = safe_i64(vals.pop().ok_or("frombase requiere 2 argumentos (base, número)")?)? as u32;
+        //    let res = i64::from_str_radix(&num_str, base).map_err(|_| "Número inválido para la base especificada")?;
+        //    push_checked(vals, num_complex::Complex64::new(res as f64, 0.0))?
+        //}
+
         // --- Operadores ---
         "+" => { let a = vals.pop().ok_or("Falta operando")?; push_checked(vals, a + b)?; }
         "-" => { let a = vals.pop().ok_or("Falta operando")?; push_checked(vals, a - b)?; }

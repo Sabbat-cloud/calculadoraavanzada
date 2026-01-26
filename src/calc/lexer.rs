@@ -122,6 +122,7 @@ impl Calculator {
                         "fact","comb","perm","nCr","nPr",
                         "exp","log10","log2","pow","min","max","mod","isprime",
                         "nextprime","rand","pct","applypct","r3d","r3i",
+                        "bin", "oct", "hex",
                     ];
 
                     if funcs.contains(&name.as_str()) {

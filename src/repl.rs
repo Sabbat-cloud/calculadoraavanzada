@@ -15,12 +15,12 @@ const CMD_HISTORY_FILE: &str = "historial_cmds.txt";
 // Lista de comandos REPL
 const COMMANDS: &[&str] = &[
     "help", "exit", "new", "mode", "vars", "mem", "hist", "clear", "plot",
-    "push", "pop", "dup", "swap", "clearstack", "mem", "sum", "avg", "min", "max", "std",
+    "push", "pop", "dup", "swap", "clearstack", "mem", "sum", "avg", "min", "max", "std", "ayuda",
 ];
 
 // Lista de funciones soportadas
 const FUNCS: &[&str] = &[
-    "exp", "sqrt", "cbrt", "ln", "abs", "floor", "ceil", "round", "trunc", "sign", "sin", "cos", "tan", "asin", "acos", "atan", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "deg2rad", "rad2deg", "cm2in", "in2cm", "m2ft", "ft2m", "fact", "log10", "log2", "isprime", "nextprime", "atan2", "hypot", "root", "log", "mcd", "mcm", "comb", "nCr", "perm", "nPr", "pow", "min", "max", "mod", "rand", "pct", "applypct", "r3d", "r3i", "abs", "arg", "conj", "re", "im",
+    "exp", "sqrt", "cbrt", "ln", "abs", "floor", "ceil", "round", "trunc", "sign", "sin", "cos", "tan", "asin", "acos", "atan", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "deg2rad", "rad2deg", "cm2in", "in2cm", "m2ft", "ft2m", "fact", "log10", "log2", "isprime", "nextprime", "atan2", "hypot", "root", "log", "mcd", "mcm", "comb", "nCr", "perm", "nPr", "pow", "min", "max", "mod", "rand", "pct", "applypct", "r3d", "r3i", "abs", "arg", "conj", "re", "im", "bin", "oct", "hex",
 ];
 
 #[derive(Clone)]
@@ -215,6 +215,10 @@ pub fn run() {
             }
 
 
+            s if s.starts_with("ayuda ") => {
+                let target = s[6..].trim();
+                crate::help::show_specific_help(target);
+                }   
             // --- Otros Comandos ---
             s if s.starts_with("plot ") => {
                 calc.plot(&s[5..]);
