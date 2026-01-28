@@ -10,6 +10,8 @@
 - [Historial](#historial)
 - [Graficación](#graficación)
 - [Integración Numérica](#integración-numérica)
+- [[Derivación Numérica](#derivación-numérica)
+- [Resolución de Ecuaciones](#resolución-de-ecuaciones)
 - [Constantes Predefinidas](#constantes-predefinidas)
 - [API del Módulo](#api-del-módulo)
 - [Ejemplos de Uso](#ejemplos-de-uso)
@@ -24,6 +26,7 @@ Calculadora científica avanzada escrita en Rust con soporte para más de 50 fun
 **Características principales:**
 - Evaluación de expresiones matemáticas complejas
 - Más de 50 funciones integradas
+- Cá
 - Sistema de variables personalizadas
 - Pila de memoria con operaciones (push, pop, dup, swap)
 - Historial persistente con reutilización
@@ -123,68 +126,56 @@ plot <expresiones> [xmin xmax] [ymin ymax] [ancho alto]
 
 ### Integración Numérica
 
+Calcula la integral definida usando la Regla del Trapecio.
+
 ```bash
 integ <expr> <min> <max> [pasos]
 
 ```
 
-* **expr**: Función a integrar dependiente de `x`.
-* **min/max**: Límites de integración.
-* **pasos**: Precisión (default: 1000).
+**Ejemplo:**
+
+```bash
+integ x^2 0 1 1000
+# Resultado ≈ 0.3333335
+
+```
 
 ### Derivación Numérica
 
-Calcula la pendiente (derivada) de una función en un punto específico utilizando el método de diferencia centrada ($f'(x) \approx \frac{f(x+h)-f(x-h)}{2h}$).
+Calcula la derivada en un punto usando diferencia centrada.
 
 ```bash
 deriv <expr> <punto> [h]
 
 ```
-* **expr**: Expresión matemática dependiente de `x`.
-* **punto**: Valor de `x` donde se quiere conocer la derivada.
-* **h**: (Opcional) Tamaño del paso diferencial. Cuanto más pequeño, más preciso (hasta el límite de flotante). Por defecto es `0.00001`.
 
-**Ejemplos:**
+**Ejemplo:**
 
 ```bash
-# Derivada de x^2 en x=3 (Teórico: 2x -> 2*3 = 6)
-[RAD] >> deriv x^2 3
-Derivada de 'x^2' en x=3 (h=0.00001)
-= 6.000000
-
-# Derivada de sin(x) en x=pi (Teórico: cos(pi) = -1)
-[RAD] >> deriv sin(x) pi
-= -1.000000
+deriv x^2 3
+# Resultado ≈ 6.0
 
 ```
+
 ### Resolución de Ecuaciones
 
-Utiliza el método iterativo de **Newton-Raphson** para encontrar raíces de funciones ($f(x) = 0$). Funciona tanto con números reales como complejos.
+Busca raíces () usando el método de Newton-Raphson. Funciona con raíces complejas.
 
 ```bash
-solve <expr> <estimación>
+solve <expr> <estimación_inicial>
 
 ```
-
-* **expr**: Función a igualar a cero (ej: `x^2 - 4` equivale a ).
-* **estimación**: Valor inicial () para comenzar la búsqueda.
 
 **Ejemplos:**
 
 ```bash
-# Encontrar raíz de x^2 - 4 empezando cerca de 1
-[RAD] >> solve x^2-4 1
-Raíz encontrada en iteración 5:
-x = 2
-
-# Encontrar raíz compleja de x^2 + 1 (solución esperada: i)
-[RAD] >> solve x^2+1 0.5+0.5i
-Raíz encontrada en iteración 4:
-x = 0 + 1i
+solve x^2-4 1       # Encuentra x=2
+solve x^2+1 i       # Encuentra x=i (Raíz compleja)
 
 ```
----
 
+---
 ## Operaciones y Funciones
 
 ### Operadores Aritméticos
@@ -444,43 +435,7 @@ plot t*cos(t);t*sin(t) 0 6.28 -10 10
 
 ---
 
-## Integración Numérica
-
-Permite calcular la integral definida de una función en un intervalo específico utilizando la Regla del Trapecio compuesta para alta precisión.
-
-### Sintaxis
-
-```bash
-integ <expr> <min> <max> [pasos]
-
-```
-
-* **expr**: Expresión matemática dependiente de la variable `x`.
-* **min**: Límite inferior de integración.
-* **max**: Límite superior de integración.
-* **pasos**: (Opcional) Número de subdivisiones para el cálculo. Por defecto es 1000.
-
-### Ejemplos:
-
-```bash
-# Integral básica de x^2 entre 0 y 1
-[RAD] >> integ x^2 0 1
-Integral definida de 'x^2' entre 0 y 1 (0.3333335, n=1000)
-= 0.3333335
-
-# Calcular área de medio círculo (pi * r^2 / 2, con r=1 => pi/2 approx 1.5708)
-[RAD] >> integ sqrt(1-x^2) -1 1 5000
-= 1.570796
-
-# Integral de funciones trigonométricas
-[RAD] >> integ sin(x) 0 pi
-= 2.0
-
-```
-
----
-
-## API del Módulo
+### API del Módulo
 
 ### Estructura Principal
 
