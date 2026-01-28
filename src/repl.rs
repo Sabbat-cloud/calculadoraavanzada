@@ -5,6 +5,7 @@ use rustyline::highlight::Highlighter;
 use rustyline::hint::Hinter;
 use rustyline::validate::Validator;
 use rustyline::{Context, Editor, Helper};
+use colored::Colorize;
 
 use crate::calc::Calculator;
 use crate::help::show_help;
@@ -20,7 +21,7 @@ const COMMANDS: &[&str] = &[
 
 // Lista de funciones soportadas
 const FUNCS: &[&str] = &[
-    "exp", "sqrt", "cbrt", "ln", "abs", "floor", "ceil", "round", "trunc", "sign", "sin", "cos", "tan", "asin", "acos", "atan", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "deg2rad", "rad2deg", "cm2in", "in2cm", "m2ft", "ft2m", "fact", "log10", "log2", "isprime", "nextprime", "atan2", "hypot", "root", "log", "mcd", "mcm", "comb", "nCr", "perm", "nPr", "pow", "min", "max", "mod", "rand", "pct", "applypct", "r3d", "r3i", "abs", "arg", "conj", "re", "im", "bin", "oct", "hex",
+    "exp", "sqrt", "cbrt", "ln", "abs", "floor", "ceil", "round", "trunc", "sign", "sin", "cos", "tan", "asin", "acos", "atan", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "deg2rad", "rad2deg", "cm2in", "in2cm", "m2ft", "ft2m", "fact", "log10", "log2", "isprime", "nextprime", "atan2", "hypot", "root", "log", "mcd", "mcm", "comb", "nCr", "perm", "nPr", "pow", "min", "max", "mod", "rand", "pct", "applypct", "r3d", "r3i", "abs", "arg", "conj", "re", "im", "bin", "oct", "hex","integ",
 ];
 
 #[derive(Clone)]
@@ -50,8 +51,70 @@ impl Hinter for CalcHelper {
     type Hint = String;
     fn hint(&self, _: &str, _: usize, _: &Context<'_>) -> Option<Self::Hint> { None }
 }
-impl Highlighter for CalcHelper {}
+
+impl Highlighter for CalcHelper {
+    fn highlight<'l>(&self, line: &'l str, _pos: usize) -> Cow<'l, str> {
+        let mut colored_line = String::new();
+        let mut chars = line.chars().peekable();
+
+        while let Some(&c) = chars.peek() {
+            if c.is_ascii_digit() || c == '.' {
+                // Números -> Azul brillante
+                let mut num = String::new();
+                while let Some(&n) = chars.peek() {
+                    if n.is_ascii_digit() || n == '.' {
+                        num.push(n);
+                        chars.next();
+                    } else { break; }
+                }
+                colored_line.push_str(&num.bright_blue().to_string());
+
+            } else if "+-*/^%=!&|".contains(c) {
+                // Operadores -> Rojo
+                colored_line.push_str(&c.to_string().red().to_string());
+                chars.next();
+
+            } else if c.is_ascii_alphabetic() || c == '_' {
+                // Palabras (Funciones, Comandos o Variables)
+                let mut word = String::new();
+                while let Some(&w) = chars.peek() {
+                    if w.is_ascii_alphanumeric() || w == '_' {
+                        word.push(w);
+                        chars.next();
+                    } else { break; }
+                }
+
+                if FUNCS.contains(&word.as_str()) || COMMANDS.contains(&word.as_str()) {
+                    // Funciones y Comandos -> Verde
+                    colored_line.push_str(&word.green().to_string());
+                } else if self.vars.iter().any(|v| v == &word) {
+                    // Variables conocidas -> Cyan
+                    colored_line.push_str(&word.cyan().to_string());
+                } else {
+                    // Texto desconocido -> Default (Blanco)
+                    colored_line.push_str(&word);
+                }
+
+            } else {
+                // Paréntesis, espacios, otros -> Default
+                colored_line.push(c);
+                chars.next();
+            }
+        }
+
+        Cow::Owned(colored_line)
+    }
+
+    // CORRECCIÓN E0050: Se añadió el parámetro `_forced: bool` que faltaba
+    fn highlight_char(&self, _line: &str, _pos: usize, _forced: bool) -> bool {
+        true 
+    }
+}
+
 impl Validator for CalcHelper {}
+
+// CORRECCIÓN E0119: Se eliminó el bloque duplicado de `impl Completer` que había aquí abajo.
+// Solo queda esta implementación (la versión mejorada):
 
 impl Completer for CalcHelper {
     type Candidate = Pair;
@@ -66,19 +129,22 @@ impl Completer for CalcHelper {
         if prefix.is_empty() { return Ok((start, vec![])); }
 
         let mut out: Vec<Pair> = Vec::new();
+        // Sugerir Comandos
         for &c in COMMANDS {
             if c.starts_with(prefix) {
-                out.push(Pair { display: c.to_string(), replacement: c.to_string() });
+                out.push(Pair { display: format!("{} (cmd)", c), replacement: c.to_string() });
             }
         }
+        // Sugerir Funciones
         for &f in FUNCS {
             if f.starts_with(prefix) {
-                out.push(Pair { display: format!("{f}()"), replacement: f.to_string() });
+                out.push(Pair { display: format!("{f}()"), replacement: format!("{f}(") }); // Mejora UX: añade '('
             }
         }
+        // Sugerir Variables
         for v in &self.vars {
             if v.starts_with(prefix) {
-                out.push(Pair { display: v.clone(), replacement: v.clone() });
+                out.push(Pair { display: format!("{} (var)", v), replacement: v.clone() });
             }
         }
         Ok((start, out))
@@ -87,19 +153,26 @@ impl Completer for CalcHelper {
 
 pub fn run() {
     let mut calc = Calculator::new();
-    let mut rl: Editor<CalcHelper, rustyline::history::DefaultHistory> = Editor::new().expect("rustyline editor");
+    // Importante: Habilitar el comportamiento de rustyline con colores
+    let config = rustyline::Config::builder()
+        .auto_add_history(true)
+        .build();
+
+    let mut rl: Editor<CalcHelper, rustyline::history::DefaultHistory> = Editor::with_config(config).expect("rustyline editor");
+
     rl.set_helper(Some(CalcHelper::new()));
     let _ = rl.load_history(CMD_HISTORY_FILE);
 
     println!("Calculadora Avanzada (Complejos) en Rust. Escribe 'help'. (Ctrl+D para salir)");
 
     loop {
+        // Actualizamos las variables conocidas en el helper para el coloreado y autocompletado
         if let Some(h) = rl.helper_mut() {
             h.update_vars(calc.vars.keys().cloned());
         }
 
         let mode_str = if calc.is_radians { "RAD" } else { "DEG" };
-        let prompt = format!("[{}] >> ", mode_str);
+        let prompt = format!("[{}] >> ", mode_str).bold().to_string(); // Prompt en negrita
 
         let line = match rl.readline(&prompt) {
             Ok(s) => s,
@@ -112,16 +185,16 @@ pub fn run() {
         if raw0.is_empty() { continue; }
         rl.add_history_entry(Cow::Borrowed(raw0)).ok();
 
-        // Lógica de historial (!! y !N) sobre historial.txt
+        // Lógica de historial (!! y !N)
         let line_to_eval = if raw0 == "!!" {
             match load_history_expr(&calc.history_file, HistoryPick::Last) {
-                Ok(expr) => { println!("(hist !!) {}", expr); expr }
+                Ok(expr) => { println!("(hist !!) {}", expr.dimmed()); expr } // Dimmed para feedback visual
                 Err(e) => { println!("Error: {}", e); continue; }
             }
         } else if raw0.starts_with('!') && raw0.len() > 1 && raw0[1..].chars().all(|c: char| c.is_ascii_digit()) {
             let n: usize = raw0[1..].parse().unwrap_or(0);
             match load_history_expr(&calc.history_file, HistoryPick::Index1(n)) {
-                Ok(expr) => { println!("(hist !{}) {}", n, expr); expr }
+                Ok(expr) => { println!("(hist !{}) {}", n, expr.dimmed()); expr }
                 Err(e) => { println!("Error: {}", e); continue; }
             }
         } else {
@@ -169,7 +242,90 @@ pub fn run() {
                     println!("SWAP -> top={} (size={})", calc.memory_stack[n - 1], n);
                 }
             },
+
+            s if s.starts_with("integ") => {
+                // Sintaxis: integ <expr> <min> <max> <pasos>
+                let args: Vec<&str> = s[6..].split_whitespace().collect();
+    
+                if args.len() < 3 {
+                    println!("Uso: integ <expr> <min> <max> [pasos]");
+                    println!("Ejemplo: integ x^2 0 1 1000");
+                } else {
+                    let expr = args[0];
+                    let min_res = calc.evaluate(args[1]);
+                    let max_res = calc.evaluate(args[2]);
+        
+                    // Parseo seguro de los límites
+                    if let (Ok(min_c), Ok(max_c)) = (min_res, max_res) {
+                        let a = min_c.re;
+                        let b = max_c.re;
             
+                        // Pasos por defecto: 1000 si no se especifica
+                        let n = if args.len() >= 4 {
+                            args[3].parse::<usize>().unwrap_or(1000)
+                        } else {
+                            1000
+                        };
+
+                        if n == 0 {
+                            println!("Error: El número de pasos debe ser > 0");
+                        } else {
+                            let h = (b - a) / (n as f64); // Delta x
+                            let mut sum = 0.0;
+                
+                        // Guardamos la variable 'x' del usuario si existe
+                        let saved_x = calc.vars.get("x").copied();
+                        let mut error = false;
+
+                        // --- Regla del Trapecio ---
+                        // f(a)
+                        calc.vars.insert("x".to_string(), num_complex::Complex64::new(a, 0.0));
+                        match calc.evaluate(expr) {
+                            Ok(y) => sum += y.re, // Primer término
+                            Err(e) => { println!("Error evaluando en {}: {}", a, e); error = true; }
+                        }
+
+                        // Suma intermedia: 2 * sum(f(x_i))
+                        if !error {
+                            for i in 1..n {
+                                let x = a + (i as f64) * h;
+                                calc.vars.insert("x".to_string(), num_complex::Complex64::new(x, 0.0));
+                                match calc.evaluate(expr) {
+                                    Ok(y) => sum += 2.0 * y.re,
+                                    Err(_) => { error = true; break; } // Ignoramos error individual en bucle grande, o abortamos
+                                }
+                            }
+                        }
+
+                        // f(b)
+                        if !error {
+                            calc.vars.insert("x".to_string(), num_complex::Complex64::new(b, 0.0));
+                            match calc.evaluate(expr) {
+                                    Ok(y) => sum += y.re, // Último término
+                                    Err(e) => { println!("Error evaluando en {}: {}", b, e); error = true; }
+                            }
+                        }
+
+                        // Restauramos 'x'
+                        if let Some(old_val) = saved_x {
+                            calc.vars.insert("x".to_string(), old_val);
+                        } else {
+                            calc.vars.remove("x");
+                        }
+
+                        if !error {
+                            let integral = (h / 2.0) * sum;
+                            calc.last_result = num_complex::Complex64::new(integral, 0.0);
+                            println!("Integral definida de '{}' entre {} y {} ({}, n={})", expr, a, b, integral, n);
+                            println!("= {}", integral);
+                        }
+                }
+            } else {
+                println!("Error: Los límites de integración deben ser números válidos.");
+            }
+        }
+    }
+
             // --- Gestión de Historial Físico ---
             "hist" => match std::fs::read(&calc.history_file) {
                 Ok(btes) => print!("{}", String::from_utf8_lossy(&btes)),
@@ -218,7 +374,7 @@ pub fn run() {
             s if s.starts_with("ayuda ") => {
                 let target = s[6..].trim();
                 crate::help::show_specific_help(target);
-                }   
+                }
             // --- Otros Comandos ---
             s if s.starts_with("plot ") => {
                 calc.plot(&s[5..]);
@@ -240,17 +396,35 @@ pub fn run() {
             }
 
             s if s.contains('=') => {
-                let p: Vec<&str> = s.split('=').collect();
-                if p.len() >= 2 {
-                    let var_name = p[0].trim().to_string();
-                    match calc.evaluate(p[1]) {
-                        Ok(r) => {
-                            calc.vars.insert(var_name.clone(), r);
-                            if r.im == 0.0 { println!("{} = {}", var_name, r.re); }
-                            else { println!("{} = {} {} {}i", var_name, r.re, if r.im >= 0.0 { "+" } else { "-" }, r.im.abs()); }
+                let parts: Vec<&str> = s.splitn(2, '=').collect();
+                if parts.len() == 2 {
+                    let var_name = parts[0].trim();
+                    let expr = parts[1].trim();
+
+                    // Validación manual básica (sin regex para no añadir deps pesadas x ahora)
+                    let is_valid_name = !var_name.is_empty()
+                        && var_name.chars().next().unwrap().is_ascii_alphabetic()
+                        && var_name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_');
+
+                    // Lista negra de constantes protegidas
+                    let reserved = ["pi", "e", "tau", "phi", "c", "i", "ans", "last"];
+
+                    if !is_valid_name {
+                        println!("Error: '{}' no es un nombre de variable válido.", var_name);
+                    } else if reserved.contains(&var_name) {
+                        println!("Error: '{}' es una constante reservada.", var_name);
+                    } else {
+                        // Proceder a evaluar
+                        match calc.evaluate(expr) {
+                            Ok(r) => {
+                                calc.vars.insert(var_name.to_string(), r);
+                                println!("{} = {}", var_name, r);
+                            }
+                            Err(e) => println!("Error al asignar: {}", e),
                         }
-                        Err(e) => println!("Error: {}", e),
                     }
+                } else {
+                    println!("Error de sintaxis en asignación.");
                 }
             }
 

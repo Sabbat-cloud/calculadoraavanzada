@@ -13,6 +13,19 @@ fn push_checked(vals: &mut Vec<Complex64>, v: Complex64) -> Result<(), String> {
     }
 }
 
+// Helper más estricto para combinatoria
+fn safe_unsigned_limit(x: Complex64, limit: u64) -> Result<u64, String> {
+    if x.im.abs() > 1e-10 { return Err("Se requiere un número real entero.".to_string()); }
+    if x.re < 0.0 { return Err("Se requiere un número positivo.".to_string()); }
+    if (x.re.round() - x.re).abs() > 1e-9 { return Err("Se requiere un número entero.".to_string()); }
+    
+    let val = x.re.round() as u64;
+    if val > limit {
+        return Err(format!("Argumento demasiado grande (límite: {}).", limit));
+    }
+    Ok(val)
+}
+
 fn safe_i64(x: Complex64) -> Result<i64, String> {
     let xr = x.re.round();
     if !xr.is_finite() || xr > i64::MAX as f64 || xr < i64::MIN as f64 {
@@ -126,7 +139,7 @@ fn apply_func(vals: &mut Vec<Complex64>, func: &str, is_rad: bool) -> Result<(),
 
         // --- Combinatoria ---
         "fact" => {
-            let n = b.re.round() as u64;
+            let n = safe_unsigned_limit(b, 170)?;
             let mut acc = 1.0f64;
             for i in 2..=n { acc *= i as f64; }
             push_checked(vals, Complex64::new(acc, 0.0))?
@@ -256,9 +269,29 @@ impl Calculator {
                     }
                 }
                 Token::RParen => {
-                    while let Some(op) = ops.pop() {
+                    // 1. Resolver todo hasta encontrar el paréntesis de apertura
+                    while let Some(op) = ops.last() {
                         if op == "(" { break; }
+                        let op = ops.pop().unwrap();
                         apply_func(&mut values, &op, self.is_radians)?;
+                    }
+    
+                    // 2. Sacar el '('
+                    if ops.pop().is_none() {
+                        return Err("Paréntesis desbalanceados".to_string());
+                    }
+
+                    // 3. ¡CRÍTICO! Si lo que queda en el tope de ops es una FUNCIÓN, aplicarla AHORA.
+                    // Esto vincula `sin(x)` inmediatamente antes de procesar un posible `^2` posterior.
+                    if let Some(top_op) = ops.last() {
+                        // Necesitamos saber si es función. Como usas Strings, miramos si NO es un operador estándar ni '('
+                        // Una solución más robusta sería mirar tu lista de funciones, pero por ahora:
+                        let is_func = !matches!(top_op.as_str(), "+" | "-" | "*" | "/" | "^" | "%" | "(");
+        
+                        if is_func {
+                            let func_name = ops.pop().unwrap();
+                            apply_func(&mut values, &func_name, self.is_radians)?;
+                        }
                     }
                 }
                 Token::Op(c) => {

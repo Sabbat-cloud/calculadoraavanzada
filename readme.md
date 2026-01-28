@@ -9,6 +9,7 @@
 - [Gestión de Pila](#gestión-de-pila)
 - [Historial](#historial)
 - [Graficación](#graficación)
+- [Integración Numérica](#integración-numérica)
 - [Constantes Predefinidas](#constantes-predefinidas)
 - [API del Módulo](#api-del-módulo)
 - [Ejemplos de Uso](#ejemplos-de-uso)
@@ -26,7 +27,8 @@ Calculadora científica avanzada escrita en Rust con soporte para más de 50 fun
 - Sistema de variables personalizadas
 - Pila de memoria con operaciones (push, pop, dup, swap)
 - Historial persistente con reutilización
-- Graficación ASCII de funciones
+- Graficación ASCII de funciones y renderizado Braille
+- Integración numérica definida
 - Autocompletado inteligente
 - Modo grados/radianes intercambiable
 
@@ -43,18 +45,23 @@ git clone <repo>
 cd calculadora-avanzada
 cargo build --release
 cargo run
+
 ```
 
 ### Ejecución
+
 ```bash
 ./target/release/calculadora
+
 ```
 
 La calculadora iniciará en modo REPL interactivo si no se usan argumentos:
-Acepta: ./calculadora2026 2+2 o ./calculadora2026 "mod(12,14)" por ejemplo.
+Acepta: `./calculadora2026 2+2` o `./calculadora2026 "mod(12,14)"` por ejemplo.
+
 ```
 Calculadora Avanzada en Rust. Escribe 'help'. (Ctrl+D para salir)
-[RAD] >> 
+[RAD] >>
+
 ```
 
 ---
@@ -62,17 +69,20 @@ Calculadora Avanzada en Rust. Escribe 'help'. (Ctrl+D para salir)
 ## Comandos del REPL
 
 ### Comandos Básicos
+
 | Comando | Descripción |
-|---------|-------------|
+| --- | --- |
 | `help` | Muestra ayuda completa |
 | `exit` | Sale de la calculadora |
 | `new` | Reinicia el sistema (borra variables, mantiene historial) |
 | `mode` | Alterna entre modo RAD (radianes) y DEG (grados) |
 | `vars` | Muestra todas las variables definidas |
-| `ayuda`| Muestra la ayuda de una funcion (ej: `ayuda cos`)
+| `ayuda` | Muestra la ayuda de una funcion (ej: `ayuda cos`) |
+
 ### Comandos de Pila
+
 | Comando | Descripción |
-|---------|-------------|
+| --- | --- |
 | `mem` | Muestra el contenido actual de la pila |
 | `push <expr>` | Evalúa expresión y la coloca en la pila |
 | `push` | Coloca el último resultado (`last`) en la pila |
@@ -82,62 +92,53 @@ Calculadora Avanzada en Rust. Escribe 'help'. (Ctrl+D para salir)
 | `clearstack` | Vacía toda la pila |
 
 ### Comandos Estadísticos
+
 Operaciones sobre todos los valores en la pila:
-- `sum` - Suma de todos los valores
-- `avg` - Promedio de todos los valores
-- `min` - Valor mínimo
-- `max` - Valor máximo
-- `std` - Desviación estándar
+
+* `sum` - Suma de todos los valores
+* `avg` - Promedio de todos los valores
+* `min` - Valor mínimo
+* `max` - Valor máximo
+* `std` - Desviación estándar
 
 ### Comandos de Historial
+
 | Comando | Descripción |
-|---------|-------------|
+| --- | --- |
 | `hist` | Muestra el historial completo |
 | `clear` | Borra el historial del archivo |
 | `!!` | Repite la última expresión del historial |
 | `!N` | Repite la línea N del historial (1-indexado) |
 
 ### Graficación
+
 ```bash
 plot <expresiones> [xmin xmax] [ymin ymax] [ancho alto]
+
 ```
-- **expresiones**: Una o más funciones separadas por ; (ej: sin(x);cos(x)).
 
-- **rangos opcionales**:
-	- xmin xmax: Rango del eje horizontal (por defecto -10 10).
-	- ymin ymax: Rango del eje vertical (por defecto autoescala).
+* **expresiones**: Una o más funciones separadas por `;` (ej: `sin(x);cos(x)`).
+* **rangos**: Opcionales para X e Y.
 
-- **dimensiones opcionales**:
-	- ancho alto: Tamaño de la rejilla ASCII en caracteres (por defecto 80 24).
+### Integración Numérica
 
-- **Nuevas características visuales*:
+```bash
+integ <expr> <min> <max> [pasos]
 
-	- Marco informativo: El gráfico ahora incluye bordes (┌ ┐, └ ┘) para delimitar el área.
-	- Etiquetas de ejes: Se muestran los valores numéricos de los límites en las esquinas y el valor medio en el eje Y para mejor referencia.
-	- Ejes dinámicos: Los ejes | y - se cruzan con un símbolo + en el origen $(0,0)$.
-
-**Ejemplos:**
 ```
-# Gráfico básico (80x24)
-plot sin(x)
 
-# Definir solo el rango X
-plot x^2 -5 5
-
-# Definir rango X, Y y dimensiones de la rejilla (100 columnas por 30 líneas)
-plot sin(x);cos(x) -6.28 6.28 -1.5 1.5 100 30
-
-# Gráfico pequeño "miniatura"
-plot sqrt(x) 0 20 0 5 40 10
-```
+* **expr**: Función a integrar dependiente de `x`.
+* **min/max**: Límites de integración.
+* **pasos**: Precisión (default: 1000).
 
 ---
 
 ## Operaciones y Funciones
 
 ### Operadores Aritméticos
+
 | Símbolo | Operación | Ejemplo |
-|---------|-----------|---------|
+| --- | --- | --- |
 | `+` | Suma | `5 + 3` |
 | `-` | Resta | `10 - 4` |
 | `*` | Multiplicación | `6 * 7` |
@@ -146,10 +147,11 @@ plot sqrt(x) 0 20 0 5 40 10
 | `%` | Módulo | `17 % 5` |
 
 ### Funciones Trigonométricas (1 argumento)
+
 Todas aceptan grados o radianes según el modo actual.
 
 | Función | Descripción | Dominio | Ejemplo |
-|---------|-------------|---------|---------|
+| --- | --- | --- | --- |
 | `sin(x)` | Seno | ℝ | `sin(30)` |
 | `cos(x)` | Coseno | ℝ | `cos(pi)` |
 | `tan(x)` | Tangente | x ≠ 90°+k·180° | `tan(45)` |
@@ -158,18 +160,20 @@ Todas aceptan grados o radianes según el modo actual.
 | `atan(x)` | Arcotangente | ℝ | `atan(1)` |
 
 ### Funciones Hiperbólicas (1 argumento)
+
 | Función | Descripción | Dominio |
-|---------|-------------|---------|
+| --- | --- | --- |
 | `sinh(x)` | Seno hiperbólico | ℝ |
 | `cosh(x)` | Coseno hiperbólico | ℝ |
 | `tanh(x)` | Tangente hiperbólica | ℝ |
 | `asinh(x)` | Inversa sinh | ℝ |
 | `acosh(x)` | Inversa cosh | x ≥ 1 |
-| `atanh(x)` | Inversa tanh | \|x\| < 1 |
+| `atanh(x)` | Inversa tanh |  |
 
 ### Funciones Exponenciales y Logarítmicas
+
 | Función | Descripción | Dominio |
-|---------|-------------|---------|
+| --- | --- | --- |
 | `exp(x)` | eˣ | ℝ |
 | `ln(x)` | Logaritmo natural | x > 0 |
 | `log10(x)` | Logaritmo base 10 | x > 0 |
@@ -177,16 +181,18 @@ Todas aceptan grados o radianes según el modo actual.
 | `log(base, x)` | Logaritmo base b | base>0, base≠1, x>0 |
 
 ### Funciones de Raíces y Potencias
+
 | Función | Sintaxis | Descripción |
-|---------|----------|-------------|
+| --- | --- | --- |
 | `sqrt(x)` | `sqrt(16)` | Raíz cuadrada |
 | `cbrt(x)` | `cbrt(27)` | Raíz cúbica |
 | `root(n, x)` | `root(3, 8)` | Raíz n-ésima |
 | `pow(base, exp)` | `pow(2, 10)` | Potencia |
 
 ### Funciones de Redondeo y Signo
+
 | Función | Descripción | Ejemplo | Resultado |
-|---------|-------------|---------|-----------|
+| --- | --- | --- | --- |
 | `floor(x)` | Piso | `floor(3.7)` | 3.0 |
 | `ceil(x)` | Techo | `ceil(3.2)` | 4.0 |
 | `round(x)` | Redondeo | `round(3.5)` | 4.0 |
@@ -195,8 +201,9 @@ Todas aceptan grados o radianes según el modo actual.
 | `sign(x)` | Signo | `sign(-10)` | -1.0 |
 
 ### Conversiones de Unidades
+
 | Función | Descripción | Ejemplo |
-|---------|-------------|---------|
+| --- | --- | --- |
 | `deg2rad(x)` | Grados → Radianes | `deg2rad(180)` |
 | `rad2deg(x)` | Radianes → Grados | `rad2deg(pi)` |
 | `cm2in(x)` | Centímetros → Pulgadas | `cm2in(2.54)` |
@@ -205,15 +212,17 @@ Todas aceptan grados o radianes según el modo actual.
 | `ft2m(x)` | Pies → Metros | `ft2m(3.28084)` |
 
 ### Conversión de Bases
+
 | Función | Descripción | Ejemplo |
-|---------|-------------|---------|
+| --- | --- | --- |
 | `bin(x)` | Muestra valor en binario | `bin(10)` -> 0b1010 |
 | `oct(x)` | Muestra valor en octal | `oct(10)` -> 0o12 |
 | `hex(x)` | Muestra valor en hexadecimal | `hex(255)` -> 0xff |
 
 ### Funciones de Combinatoria
+
 | Función | Sintaxis | Descripción |
-|---------|----------|-------------|
+| --- | --- | --- |
 | `fact(n)` | `fact(5)` | Factorial (n ≥ 0) |
 | `comb(n, k)` | `comb(5, 2)` | Combinaciones |
 | `nCr(n, k)` | `nCr(10, 3)` | Combinaciones (alias) |
@@ -221,20 +230,23 @@ Todas aceptan grados o radianes según el modo actual.
 | `nPr(n, k)` | `nPr(10, 3)` | Permutaciones (alias) |
 
 ### Funciones de Números Primos
+
 | Función | Descripción | Ejemplo |
-|---------|-------------|---------|
+| --- | --- | --- |
 | `isprime(n)` | Verifica si n es primo | `isprime(17)` → 1.0 |
 | `nextprime(n)` | Siguiente primo ≥ n | `nextprime(10)` → 11.0 |
 
 ### Funciones de MCD y MCM
+
 | Función | Sintaxis | Descripción |
-|---------|----------|-------------|
+| --- | --- | --- |
 | `mcd(a, b)` | `mcd(12, 18)` | Máximo común divisor |
 | `mcm(a, b)` | `mcm(4, 6)` | Mínimo común múltiplo |
 
 ### Funciones Estadísticas y Aleatorias
+
 | Función | Sintaxis | Descripción |
-|---------|----------|-------------|
+| --- | --- | --- |
 | `min(a, b)` | `min(5, 3)` | Mínimo de dos valores |
 | `max(a, b)` | `max(5, 3)` | Máximo de dos valores |
 | `rand(min, max)` | `rand(0, 1)` | Número aleatorio |
@@ -242,8 +254,9 @@ Todas aceptan grados o radianes según el modo actual.
 | `applypct(%, valor)` | `applypct(20, 100)` | Aplica porcentaje |
 
 ### Funciones de 3 Argumentos
+
 | Función | Sintaxis | Descripción |
-|---------|----------|-------------|
+| --- | --- | --- |
 | `r3d(a, b, c)` | `r3d(2, 3, 6)` | Regla de tres directa: (c×b)/a |
 | `r3i(a, b, c)` | `r3i(2, 3, 6)` | Regla de tres inversa: (a×b)/c |
 
@@ -252,8 +265,9 @@ Todas aceptan grados o radianes según el modo actual.
 ## Sistema de Variables
 
 ### Variables Predefinidas
+
 | Variable | Valor | Descripción |
-|----------|-------|-------------|
+| --- | --- | --- |
 | `pi` | 3.141592653589793 | π |
 | `e` | 2.718281828459045 | Número de Euler |
 | `tau` | 6.283185307179586 | 2π |
@@ -264,6 +278,7 @@ Todas aceptan grados o radianes según el modo actual.
 | `ans` | último resultado | Alias de `last` |
 
 ### Definición de Variables
+
 ```bash
 # Sintaxis: <nombre> = <expresión>
 radio = 5
@@ -272,11 +287,13 @@ perimetro = 2 * pi * radio
 
 # Uso de variables
 area + perimetro
+
 ```
 
 ### Variables Especiales
-- `x`: Usada en graficación, se puede sobreescribir
-- `last`/`ans`: Siempre contiene el último resultado calculado
+
+* `x`: Usada en graficación, se puede sobreescribir
+* `last`/`ans`: Siempre contiene el último resultado calculado
 
 ---
 
@@ -285,6 +302,7 @@ area + perimetro
 La pila permite almacenar múltiples valores para operaciones posteriores.
 
 ### Ejemplo de Flujo de Pila:
+
 ```bash
 [RAD] >> 5 + 3
 = 8
@@ -315,6 +333,7 @@ SWAP -> top=14 (size=3)
 
 [RAD] >> pop
 POP -> 8 (size=2)
+
 ```
 
 ---
@@ -322,11 +341,13 @@ POP -> 8 (size=2)
 ## Historial
 
 ### Archivo de Historial
-- Ubicación: `historial.txt` (en directorio de ejecución)
-- Formato: `<expresión> = <resultado>`
-- Persiste entre ejecuciones
+
+* Ubicación: `historial.txt` (en directorio de ejecución)
+* Formato: `<expresión> = <resultado>`
+* Persiste entre ejecuciones
 
 ### Comandos de Reutilización
+
 ```bash
 # Historial actual:
 # 1: 5 + 3 = 8
@@ -336,20 +357,26 @@ POP -> 8 (size=2)
 !!      # Repite: 2^10
 !2      # Repite: sin(30)
 !1      # Repite: 5 + 3
+
 ```
 
 ---
 
 ## Graficación
 
+La calculadora incluye un motor de renderizado dual (ASCII estándar y Braille de alta resolución) para visualizar funciones.
+
 ### Sintaxis Completa
+
 ```bash
-plot <funciones> [xmin xmax] [ymin ymax]
+plot <funciones> [xmin xmax] [ymin ymax] [ancho alto]
+
 ```
 
 ### Ejemplos Detallados:
+
 ```bash
-# Gráfico básico con autoescala
+# Gráfico básico con autoescala (usa Braille por defecto)
 plot sin(x)
 
 # Dos funciones con rango X personalizado
@@ -360,22 +387,51 @@ plot x^2;sqrt(x);log(x+1) 0 10 0 5
 
 # Función paramétrica usando múltiples plots
 plot t*cos(t);t*sin(t) 0 6.28 -10 10
+
 ```
 
-### Símbolos de Gráfico:
-- `•` - Primera función
-- `x` - Segunda función
-- `*` - Tercera función
-- `+` - Cuarta función
-- `o` - Quinta función
-- `#` - Sexta función
-- `@` - Séptima función
+---
+
+## Integración Numérica
+
+Permite calcular la integral definida de una función en un intervalo específico utilizando la Regla del Trapecio compuesta para alta precisión.
+
+### Sintaxis
+
+```bash
+integ <expr> <min> <max> [pasos]
+
+```
+
+* **expr**: Expresión matemática dependiente de la variable `x`.
+* **min**: Límite inferior de integración.
+* **max**: Límite superior de integración.
+* **pasos**: (Opcional) Número de subdivisiones para el cálculo. Por defecto es 1000.
+
+### Ejemplos:
+
+```bash
+# Integral básica de x^2 entre 0 y 1
+[RAD] >> integ x^2 0 1
+Integral definida de 'x^2' entre 0 y 1 (0.3333335, n=1000)
+= 0.3333335
+
+# Calcular área de medio círculo (pi * r^2 / 2, con r=1 => pi/2 approx 1.5708)
+[RAD] >> integ sqrt(1-x^2) -1 1 5000
+= 1.570796
+
+# Integral de funciones trigonométricas
+[RAD] >> integ sin(x) 0 pi
+= 2.0
+
+```
 
 ---
 
 ## API del Módulo
 
 ### Estructura Principal
+
 ```rust
 pub struct Calculator {
     pub memory_stack: Vec<f64>,
@@ -384,9 +440,11 @@ pub struct Calculator {
     pub is_radians: bool,
     pub last_result: f64,
 }
+
 ```
 
 ### Métodos Principales
+
 ```rust
 impl Calculator {
     pub fn new() -> Self;
@@ -394,11 +452,13 @@ impl Calculator {
     pub fn evaluate(&mut self, expr: &str) -> Result<f64, String>;
     pub fn plot(&mut self, input: &str);
 }
+
 ```
 
 ### Módulos del Crate
+
 | Módulo | Responsabilidad |
-|--------|----------------|
+| --- | --- |
 | `calc` | Estructura principal y constantes |
 | `eval` | Evaluación de expresiones y funciones |
 | `lexer` | Tokenización y parsing |
@@ -406,7 +466,7 @@ impl Calculator {
 | `help` | Documentación de ayuda |
 | `history` | Gestión de historial |
 | `math_ext` | Funciones matemáticas extendidas |
-| `plot` | Graficación ASCII |
+| `plot` | Graficación ASCII / Braille |
 | `token` | Definición de tokens |
 
 ---
@@ -414,6 +474,7 @@ impl Calculator {
 ## Ejemplos de Uso
 
 ### Ejemplo 1: Cálculos Científicos
+
 ```bash
 [RAD] >> sqrt(16) + log10(100)
 = 6
@@ -423,9 +484,11 @@ impl Calculator {
 
 [RAD] >> fact(7) / (fact(3) * fact(4))
 = 35
+
 ```
 
 ### Ejemplo 2: Trabajo con Variables
+
 ```bash
 [DEG] >> radio = 5
 radio = 5
@@ -438,9 +501,11 @@ perimetro = 31.41592653589793
 
 [DEG] >> area + perimetro
 = 109.95574287564276
+
 ```
 
 ### Ejemplo 3: Uso de Pila para Cálculos Complejos
+
 ```bash
 # Calcular estadísticas sobre un conjunto de datos
 [RAD] >> push 10 20 30 40 50
@@ -458,9 +523,11 @@ PUSH -> 50 (size=5)
 
 [RAD] >> std
 = 14.142135623730951
+
 ```
 
 ### Ejemplo 4: Graficación Avanzada
+
 ```bash
 # Gráfico de funciones trigonométricas
 [RAD] >> plot sin(x);cos(x);tan(x) -6.28 6.28 -2 2
@@ -470,9 +537,11 @@ PUSH -> 50 (size=5)
 
 # Múltiples funciones con diferentes símbolos
 [RAD] >> plot exp(-0.1*x)*sin(x);cos(x) -20 20 -2 2
+
 ```
 
 ### Ejemplo 5: Script Interactivo
+
 ```bash
 # Resolver ecuación cuadrática: x² - 5x + 6 = 0
 [RAD] >> a = 1
@@ -492,6 +561,7 @@ x1 = 3
 
 [RAD] >> x2 = (-b - sqrt(discriminante)) / (2*a)
 x2 = 2
+
 ```
 
 ---
@@ -501,7 +571,7 @@ x2 = 2
 ### Errores Comunes y Soluciones
 
 | Error | Causa Probable | Solución |
-|-------|----------------|----------|
+| --- | --- | --- |
 | `Error: Función/operador X no implementado` | Nombre de función incorrecto | Verificar ortografía o usar `help` |
 | `Error: Variable 'X' no existe` | Variable no definida | Definir variable primero |
 | `Error: División por cero` | Denominador cero | Verificar expresión |
@@ -511,19 +581,22 @@ x2 = 2
 | `Error: mcd/mcm fuera de rango` | Números muy grandes | Reducir valores |
 
 ### Atajos de Teclado
+
 | Combinación | Acción |
-|-------------|--------|
+| --- | --- |
 | `Ctrl + C` | Cancela entrada actual |
 | `Ctrl + D` | Sale de la calculadora |
 | `↑` / `↓` | Navega por historial de comandos |
 | `Tab` | Autocompleta comandos/variables |
 
 ### Modos de Ángulo
-- **DEG**: Funciones trigonométricas usan grados (0-360)
-- **RAD**: Funciones trigonométricas usan radianes (0-2π)
-- **Cambio**: Comando `mode` alterna entre ambos
+
+* **DEG**: Funciones trigonométricas usan grados (0-360)
+* **RAD**: Funciones trigonométricas usan radianes (0-2π)
+* **Cambio**: Comando `mode` alterna entre ambos
 
 ### Formatos Numéricos Soportados
+
 ```
 Entero:       123
 Decimal:      123.456
@@ -531,6 +604,7 @@ Científico:   1.23e4, 5.6E-3
 Notación E:   2.5e6
 Prefijo .:    .75 (0.75)
 Negativo:     -45, -3.14
+
 ```
 
 ---
@@ -538,17 +612,21 @@ Negativo:     -45, -3.14
 ## Contribución y Extensión
 
 ### Añadir Nuevas Funciones
+
 Para añadir una nueva función matemática:
 
 1. **Añadir a la lista de funciones** en `repl.rs`:
+
 ```rust
 const FUNCS: &[&str] = &[
     // ...
     "nueva_funcion",
 ];
+
 ```
 
-2. **Implementar en `eval.rs`**:
+2. **Implementar en `eval.rs**`:
+
 ```rust
 match func {
     // ...
@@ -558,29 +636,33 @@ match func {
         push_checked(vals, resultado)?;
     }
 }
+
 ```
 
 3. **Actualizar ayuda** en `help.rs`
 
 ### Personalización
-- **Archivo de historial**: Modificar `history_file` en `Calculator::new()`
-- **Precisión**: Modificar `format!` en salidas
-- **Tamaño de gráfico**: Cambiar `width` y `height` en `plot.rs`
+
+* **Archivo de historial**: Modificar `history_file` en `Calculator::new()`
+* **Precisión**: Modificar `format!` en salidas
+* **Tamaño de gráfico**: Cambiar `width` y `height` en `plot.rs`
 
 ---
 
 ## Licencia y Créditos
 
 Esta calculadora es un proyecto educativo que demuestra:
-- Parsing de expresiones matemáticas en Rust
-- Diseño de REPL interactivo
-- Arquitectura modular
-- Manejo de errores robusto
+
+* Parsing de expresiones matemáticas en Rust
+* Diseño de REPL interactivo
+* Arquitectura modular
+* Manejo de errores robusto
 
 **Funcionalidades inspiradas en:**
-- Calculadoras HP con notación RPN
-- Python con módulos math y numpy
-- Herramientas Unix como bc y dc
+
+* Calculadoras HP con notación RPN
+* Python con módulos math y numpy
+* Herramientas Unix como bc y dc
 
 ---
 
