@@ -76,6 +76,7 @@ Calculadora Avanzada en Rust. Escribe 'help'. (Ctrl+D para salir)
 | `exit` | Sale de la calculadora |
 | `new` | Reinicia el sistema (borra variables, mantiene historial) |
 | `mode` | Alterna entre modo RAD (radianes) y DEG (grados) |
+| `fmt`  | Alterna formato (Decimal / Científico) |
 | `vars` | Muestra todas las variables definidas |
 | `ayuda` | Muestra la ayuda de una funcion (ej: `ayuda cos`) |
 
@@ -131,6 +132,57 @@ integ <expr> <min> <max> [pasos]
 * **min/max**: Límites de integración.
 * **pasos**: Precisión (default: 1000).
 
+### Derivación Numérica
+
+Calcula la pendiente (derivada) de una función en un punto específico utilizando el método de diferencia centrada ($f'(x) \approx \frac{f(x+h)-f(x-h)}{2h}$).
+
+```bash
+deriv <expr> <punto> [h]
+
+```
+* **expr**: Expresión matemática dependiente de `x`.
+* **punto**: Valor de `x` donde se quiere conocer la derivada.
+* **h**: (Opcional) Tamaño del paso diferencial. Cuanto más pequeño, más preciso (hasta el límite de flotante). Por defecto es `0.00001`.
+
+**Ejemplos:**
+
+```bash
+# Derivada de x^2 en x=3 (Teórico: 2x -> 2*3 = 6)
+[RAD] >> deriv x^2 3
+Derivada de 'x^2' en x=3 (h=0.00001)
+= 6.000000
+
+# Derivada de sin(x) en x=pi (Teórico: cos(pi) = -1)
+[RAD] >> deriv sin(x) pi
+= -1.000000
+
+```
+### Resolución de Ecuaciones
+
+Utiliza el método iterativo de **Newton-Raphson** para encontrar raíces de funciones ($f(x) = 0$). Funciona tanto con números reales como complejos.
+
+```bash
+solve <expr> <estimación>
+
+```
+
+* **expr**: Función a igualar a cero (ej: `x^2 - 4` equivale a ).
+* **estimación**: Valor inicial () para comenzar la búsqueda.
+
+**Ejemplos:**
+
+```bash
+# Encontrar raíz de x^2 - 4 empezando cerca de 1
+[RAD] >> solve x^2-4 1
+Raíz encontrada en iteración 5:
+x = 2
+
+# Encontrar raíz compleja de x^2 + 1 (solución esperada: i)
+[RAD] >> solve x^2+1 0.5+0.5i
+Raíz encontrada en iteración 4:
+x = 0 + 1i
+
+```
 ---
 
 ## Operaciones y Funciones

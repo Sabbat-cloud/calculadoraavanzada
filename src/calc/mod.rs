@@ -6,45 +6,60 @@ pub mod token;
 use std::collections::HashMap;
 use num_complex::Complex64;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum OutputFormat {
+    Decimal,
+    Scientific,
+}
+
 pub struct Calculator {
     pub memory_stack: Vec<Complex64>, // Cambio a Complex
     pub vars: HashMap<String, Complex64>, // Cambio a Complex
     pub history_file: String,
     pub is_radians: bool,
     pub last_result: Complex64, // Cambio a Complex
+    pub output_format: OutputFormat,
 }
 
 impl Calculator {
     pub fn new() -> Self {
-        let mut calc = Self {
+        let mut vars = HashMap::new();
+        vars.insert("pi".to_string(), Complex64::new(std::f64::consts::PI, 0.0));
+        vars.insert("e".to_string(), Complex64::new(std::f64::consts::E, 0.0));
+        vars.insert("tau".to_string(), Complex64::new(std::f64::consts::TAU, 0.0));
+        vars.insert("phi".to_string(), Complex64::new(1.618033988749895, 0.0));
+        vars.insert("golden".to_string(), Complex64::new(1.618033988749895, 0.0));
+        vars.insert("c".to_string(), Complex64::new(299792458.0, 0.0));
+        vars.insert("i".to_string(), Complex64::new(0.0, 1.0));
+
+        Calculator {
             memory_stack: Vec::new(),
-            vars: HashMap::new(),
+            vars,
             history_file: "historial.txt".to_string(),
-            is_radians: false,
+            is_radians: true, // Por defecto en Radianes
             last_result: Complex64::new(0.0, 0.0),
-        };
-        calc.reset();
-        calc
+            // 3. Inicializamos en Decimal por defecto
+            output_format: OutputFormat::Decimal, 
+        }
     }
 
     pub fn reset(&mut self) {
         self.memory_stack.clear();
         self.vars.clear();
-
-        // Constantes (se insertan como complejos con parte imaginaria 0)
+        // Re-inicializar constantes
         self.vars.insert("pi".to_string(), Complex64::new(std::f64::consts::PI, 0.0));
         self.vars.insert("e".to_string(), Complex64::new(std::f64::consts::E, 0.0));
-        self.vars.insert("tau".to_string(), Complex64::new(2.0 * std::f64::consts::PI, 0.0));
-        self.vars.insert("i".to_string(), Complex64::new(0.0, 1.0)); // Nueva constante i
-
-        let phi = (1.0 + 5.0f64.sqrt()) / 2.0;
-        self.vars.insert("phi".to_string(), Complex64::new(phi, 0.0));
-        self.vars.insert("c".to_string(), Complex64::new(299_792_458.0, 0.0));
-
+        self.vars.insert("tau".to_string(), Complex64::new(std::f64::consts::TAU, 0.0));
+        self.vars.insert("phi".to_string(), Complex64::new(1.618033988749895, 0.0));
+        self.vars.insert("golden".to_string(), Complex64::new(1.618033988749895, 0.0));
+        self.vars.insert("c".to_string(), Complex64::new(299792458.0, 0.0));
+        self.vars.insert("i".to_string(), Complex64::new(0.0, 1.0));
+        
         self.last_result = Complex64::new(0.0, 0.0);
+        self.is_radians = true;
+        self.output_format = OutputFormat::Decimal; // Reset también el formato
     }
-
+    
     pub(crate) fn parse_number_str(&self, s: &str) -> Result<Complex64, String> {
         s.parse::<f64>()
             .map(|n| Complex64::new(n, 0.0))

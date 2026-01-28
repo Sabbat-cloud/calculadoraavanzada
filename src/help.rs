@@ -11,6 +11,7 @@ pub fn show_help() {
     println!("  {:<35} : {}", "Comando <expr>".cyan(), "Evalúa la expresión");
     println!("  {:<35} : {}", "var = <expr>".cyan(), "Guarda una variable");
     println!("  {:<35} : {}", "mode".cyan(), "Alterna entre RAD y DEG");
+    println!("  {:<35} : {}", "fmt".cyan(), "Alterna formato (Decimal / Científico)");
     println!("  {:<35} : {}", "new".cyan(), "Reinicia la calculadora (borra vars)");
     println!("  {:<35} : {}", "exit / quit".cyan(), "Salir del programa");
 
@@ -40,6 +41,8 @@ pub fn show_help() {
     println!("  {:<35} : {}", "last / ans".cyan(), "Usar el último resultado");
     println!("  {:<35} : {}", "plot <exprs> ...".cyan(), "Graficar funciones, Ejem: plot sin(x)");
     println!("  {:<35} : {}", "integ <expr> ...".cyan(), "Integración numérica");
+    println!("  {:<35} : {}", "deriv <expr> ...".cyan(), "Derivada numérica");
+    println!("  {:<35} : {}", "solve <expr> <guess>".cyan(), "Resolver ecuación (Newton)");
     println!("  {:<35} : {}", "ayuda <cmd>".cyan(), "Ayuda específica (ej: ayuda sin)");
     println!();
 }
@@ -104,6 +107,7 @@ pub fn show_specific_help(cmd: &str) {
 
         // --- Comandos REPL ---
         "integ" => ("integ <expr> <min> <max> [steps]", "Calcula la integral definida numérica (Regla del Trapecio).\nEj: integ x^2 0 1 1000 -> 0.333..."),
+        "deriv" => ("deriv <expr> <x> [h]", "Calcula la derivada numérica (diferencia centrada) de una función en un punto.\nEj: deriv x^2 3 -> 6"),
 
         // --- Complejos ---
         "arg" => ("arg(z)", "Argumento (ángulo) de un número complejo."),
