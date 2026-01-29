@@ -2,6 +2,8 @@ pub mod eval;
 pub mod lexer;
 pub mod plot;
 pub mod token;
+#[cfg(test)]
+mod tests;
 
 use std::collections::HashMap;
 use num_complex::Complex64;

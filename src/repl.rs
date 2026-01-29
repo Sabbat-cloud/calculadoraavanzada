@@ -224,11 +224,11 @@ pub fn run() {
             "new" => {
                 calc.reset();
                 println!("Sistema reseteado.");
-            }
+            },
             "mode" => {
                 calc.is_radians = !calc.is_radians;
                 println!("Modo: {}", if calc.is_radians { "RAD" } else { "DEG" });
-            }
+            },
             "fmt" | "fmt toggle" => {
                 use crate::calc::OutputFormat;
                 calc.output_format = match calc.output_format {
@@ -240,21 +240,21 @@ pub fn run() {
                     OutputFormat::Scientific => "Científico (e)",
                 };
                 println!("Formato numérico: {}", estado.cyan());
-            }
+            },
             "fmt sci" => {
                 calc.output_format = crate::calc::OutputFormat::Scientific;
                 println!("Formato numérico: Científico");
-            }
+            },
             "fmt dec" => {
                 calc.output_format = crate::calc::OutputFormat::Decimal;
                 println!("Formato numérico: Decimal");
-            }
+            },
             "vars" => println!("Vars: {:?}", calc.vars),
             "mem" => println!("Pila: {:?}", calc.memory_stack),
             "clearstack" => {
                 calc.memory_stack.clear();
                 println!("Pila vaciada.");
-            }
+            },
             "pop" => match calc.memory_stack.pop() {
                 Some(v) => {
                     calc.last_result = v;
@@ -359,7 +359,7 @@ pub fn run() {
                         println!("Error: La estimación inicial debe ser un número válido.");
                     }
                 }
-            }
+            },
 
             s if s.starts_with("deriv ") => {
                 // Sintaxis: deriv <expr> <x_val> [h]
@@ -418,7 +418,7 @@ pub fn run() {
                         println!("Error: El punto de evaluación debe ser un número válido.");
                     }
                 }
-            }
+            },
 
             s if s.starts_with("integ ") => {
                 let args: Vec<&str> = s[6..].split_whitespace().collect();
@@ -486,7 +486,7 @@ pub fn run() {
                         println!("Error: Los límites de integración deben ser números válidos.");
                     }
                 }
-            }
+            },
 
             // --- Historial Físico ---
             "hist" => match std::fs::read(&calc.history_file) {
@@ -528,14 +528,14 @@ pub fn run() {
             },
             "author" => {
                 println!("By Oscar Gimenez Blasco.\nhttps://sabbat.cloud\nhttps://github.com/Sabat-cloud");
-            }
+            },
             s if s.starts_with("ayuda ") => {
                 let target = s[6..].trim();
                 crate::help::show_specific_help(target);
-            }
+            },
             s if s.starts_with("plot ") => {
                 calc.plot(&s[5..]);
-            }
+            },
             s if s.starts_with("export ") => {
                 let filename = s[7..].trim();
                 if filename.is_empty() {
@@ -546,7 +546,7 @@ pub fn run() {
                         Err(e) => println!("Error exportando SVG: {}", e.red()),
                     }
                 }
-            }
+            },
 
             s if s.starts_with("push ") => {
                 let rest = s[5..].trim();
@@ -561,7 +561,7 @@ pub fn run() {
                         Err(e) => { println!("Error en '{}': {}", p, e); break; }
                     }
                 }
-            }
+            },
             s if s.contains('=') => {
                 let parts: Vec<&str> = s.splitn(2, '=').collect();
                 if parts.len() == 2 {

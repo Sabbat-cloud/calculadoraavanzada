@@ -3,48 +3,81 @@ use colored::Colorize;
 pub fn show_help() {
     println!("{}", "\n--- CALCULADORA AVANZADA EN RUST ---".yellow().bold());
     
+    // --- Helpers de formateo para columnas ---
+    // Ancho fijo para la columna del comando
+    const CMD_WIDTH: usize = 20;
+    const DESC_WIDTH: usize = 28;
+
+    // Función auxiliar para imprimir 2 columnas: [Cmd1 : Desc1] | [Cmd2 : Desc2]
+    let print_row = |c1: &str, d1: &str, c2: &str, d2: &str| {
+        // Columna 1
+        print!("  {}", c1.cyan());
+        // Rellenar espacios manualmente para no romper alineación con caracteres ANSI
+        for _ in 0..CMD_WIDTH.saturating_sub(c1.len()) { print!(" "); }
+        print!(": ");
+        
+        // Descripción 1 (Truncada o rellenada si es necesario para mantener la rejilla)
+        let d1_pad = if d1.len() > DESC_WIDTH { &d1[..DESC_WIDTH] } else { d1 };
+        print!("{:<width$} ", d1_pad, width = DESC_WIDTH);
+
+        // Separador central
+        print!("{} ", "|".truecolor(100, 100, 100)); // Gris oscuro
+
+        // Columna 2
+        if !c2.is_empty() {
+            print!("  {}", c2.cyan());
+            for _ in 0..CMD_WIDTH.saturating_sub(c2.len()) { print!(" "); }
+            println!(": {}", d2);
+        } else {
+            println!(); // Salto de línea si no hay segunda columna
+        }
+    };
+
+    // --- SECCIÓN 1: Operadores y Constantes (Unificada) ---
     println!("{}", "\nOperaciones y Constantes:".green().bold());
-    println!("  Operadores : +, -, *, /, ^, %");
-    println!("  Constantes : pi, e, phi/golden, tau, c");
-    
-    println!("{}", "\nComandos Básicos:".green().bold());
-    println!("  {:<35} : {}", "Comando <expr>".cyan(), "Evalúa la expresión");
-    println!("  {:<35} : {}", "var = <expr>".cyan(), "Guarda una variable");
-    println!("  {:<35} : {}", "mode".cyan(), "Alterna entre RAD y DEG");
-    println!("  {:<35} : {}", "fmt".cyan(), "Alterna formato (Decimal / Científico)");
-    println!("  {:<35} : {}", "new".cyan(), "Reinicia la calculadora (borra vars)");
-    println!("  {:<35} : {}", "exit / quit".cyan(), "Salir del programa");
+    // Combinamos ambas líneas usando un separador visual
+    println!("  Operadores : +, -, *, /, ^, %   |   Constantes : pi, e, phi, tau, c");
 
-    println!("{}", "\nFunciones Matemáticas:".green().bold());
-    println!("  {:<15} : {}", "1 Argumento".blue(), "sin, cos, tan, asin, acos, atan, sinh, cosh, tanh");
-    println!("  {:<15}   {}", "".blue(), "exp, ln, log10, log2, sqrt, cbrt, abs, sign");
-    println!("  {:<15}   {}", "".blue(), "floor, ceil, round, trunc, fact, isprime, nextprime");
-    println!("  {:<15}   {}", "".blue(), "deg2rad, rad2deg, cm2in, in2cm, m2ft, ft2m");
-    println!("  {:<15} : {}", "2 Argumentos".blue(), "root(n,x), log(b,n), pow(b,e), hypot(x,y), atan2(y,x)");
-    println!("  {:<15}   {}", "".blue(), "min, max, mod, mcd, mcm, comb, perm, rand, pct, applypct");
-    println!("  {:<15} : {}", "3 Argumentos".blue(), "r3d(a,b,c), r3i(a,b,c) (Reglas de tres)");
+    // --- SECCIÓN 2: Comandos Generales (2 Columnas) ---
+    println!("{}", "\nComandos Generales:".green().bold());
+    print_row("help", "Muestra esta ayuda", "exit / quit", "Salir del programa");
+    print_row("new", "Reinicia la calculadora", "clear", "Limpia la pantalla/hist");
+    print_row("mode", "Alterna RAD / DEG", "fmt", "Alterna Decimal/Científico");
+    print_row("var = <expr>", "Asignar variable", "vars", "Listar variables");
 
-    println!("{}", "\nNúmeros Complejos y Bases:".green().bold());
-    println!("  {:<15} : {}", "Complejos".magenta(), "abs, arg, conj, re, im");
-    println!("  {:<15} : {}", "Bases".magenta(), "bin(n), oct(n), hex(n)");
-
+    // --- SECCIÓN 3: Pila de Memoria (2 Columnas) ---
     println!("{}", "\nGestión de Pila (Stack):".green().bold());
-    println!("  {:<35} : {}", "push <expr> ...".cyan(), "Añade valores a la pila");
-    println!("  {:<35} : {}", "pop / dup / swap".cyan(), "Manipula el último valor");
-    println!("  {:<35} : {}", "clearstack".cyan(), "Vacía la pila");
-    println!("  {:<35} : {}", "mem".cyan(), "Muestra el contenido de la pila");
-    println!("  {:<35} : {}", "sum / avg / min / max / std".cyan(), "Estadística sobre la pila");
+    print_row("push <expr>", "Añadir a la pila", "pop", "Sacar último valor");
+    print_row("dup", "Duplicar último", "swap", "Intercambiar top 2");
+    print_row("mem", "Ver pila completa", "clearstack", "Vaciar pila");
+    print_row("sum / avg", "Suma/Promedio pila", "min / max", "Mín/Máx de la pila");
 
-    println!("{}", "\nHistorial y Herramientas:".green().bold());
-    println!("  {:<35} : {}", "hist / clear".cyan(), "Ver / Borrar historial");
-    println!("  {:<35} : {}", "!! / !N".cyan(), "Repetir última exp / línea N");
-    println!("  {:<35} : {}", "last / ans".cyan(), "Usar el último resultado");
-    println!("  {:<35} : {}", "plot <exprs> ...".cyan(), "Graficar funciones, Ejem: plot sin(x)");
-    println!("  {:<35} : {}", "export <nombrefichero.svg>".cyan(), "Exporta el último plot a un fichero svg");
-    println!("  {:<35} : {}", "integ <expr> ...".cyan(), "Integración numérica");
-    println!("  {:<35} : {}", "deriv <expr> ...".cyan(), "Derivada numérica");
-    println!("  {:<35} : {}", "solve <expr> <guess>".cyan(), "Resolver ecuación (Newton)");
-    println!("  {:<35} : {}", "ayuda <cmd>".cyan(), "Ayuda específica (ej: ayuda sin)");
+    // --- SECCIÓN 4: Herramientas Avanzadas (2 Columnas) ---
+    println!("{}", "\nHerramientas Avanzadas:".green().bold());
+    print_row("hist", "Ver historial", "!! / !N", "Repetir última / línea N");
+    print_row("last / ans", "Último resultado", "plot <expr>", "Graficar (ASCII/Braille)");
+    print_row("export <file>", "Exportar plot a SVG", "solve <eq> <x>", "Newton-Raphson (raíz)");
+    print_row("integ <ex> <a> <b>", "Integral definida", "deriv <ex> <x>", "Derivada en un punto");
+    print_row("ayuda <cmd>", "Ayuda detallada de func", "", "");
+
+    // --- SECCIÓN 5: Funciones Matemáticas (Compacto / Grid) ---
+    println!("{}", "\nFunciones Matemáticas Disponibles:".green().bold());
+    
+    let print_cat = |label: &str, funcs: &str| {
+        println!("  {:<15} : {}", label.blue(), funcs);
+    };
+
+    print_cat("Trigonometría", "sin, cos, tan, asin, acos, atan, atan2, hypot");
+    print_cat("Hiperbólicas", "sinh, cosh, tanh, asinh, acosh, atanh");
+    print_cat("Exponenciales", "exp, ln, log10, log2, log(b,n), pow, sqrt, cbrt, root");
+    print_cat("Redondeo/Num", "abs, sign, floor, ceil, round, trunc, fact, mcd, mcm");
+    print_cat("Conversiones", "deg2rad, rad2deg, cm2in, in2cm, m2ft, ft2m");
+    print_cat("Combinatoria", "comb (nCr), perm (nPr)");
+    print_cat("Estadística/Var", "min, max, mod, rand, pct, applypct");
+    print_cat("Regla de 3", "r3d(a,b,c), r3i(a,b,c)");
+    print_cat("Complejos", "abs, arg, conj, re, im");
+    print_cat("Bases", "bin(n), oct(n), hex(n)");
+    
     println!();
 }
 
@@ -120,6 +153,10 @@ pub fn show_specific_help(cmd: &str) {
         "bin" => ("bin(n)", "Muestra n en binario (0b...). Ej: bin(10) -> 0b1010"),
         "oct" => ("oct(n)", "Muestra n en octal (0o...). Ej: oct(10) -> 0o12"),
         "hex" => ("hex(n)", "Muestra n en hexadecimal (0x...). Ej: hex(255) -> 0xff"),
+
+        // --- Graficacion ---
+        "plot" =>("plot <expr>", "Muestra la gráfica en formato ascii en alta resolucion: Ej:  plot sin(x);cos(x)"),
+        "export" =>("export <nombre.svg>", "Exporta el último plot en formato svg."),
 
         _ => ("", "Ayuda no disponible para este término. Usa 'help' para la lista general."),
     };

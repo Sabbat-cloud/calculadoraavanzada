@@ -10,7 +10,7 @@
 - [Historial](#historial)
 - [Graficación](#graficación)
 - [Integración Numérica](#integración-numérica)
-- [[Derivación Numérica](#derivación-numérica)
+- [Derivación Numérica](#erivación-numérica)
 - [Resolución de Ecuaciones](#resolución-de-ecuaciones)
 - [Constantes Predefinidas](#constantes-predefinidas)
 - [API del Módulo](#api-del-módulo)
@@ -30,7 +30,7 @@ Calculadora científica avanzada escrita en Rust con soporte para más de 50 fun
 - Sistema de variables personalizadas
 - Pila de memoria con operaciones (push, pop, dup, swap)
 - Historial persistente con reutilización
-- Graficación ASCII de funciones y renderizado Braille
+- Graficación dual ASCII de funciones y renderizado Braille y exportación a SVG
 - Integración numérica definida
 - Autocompletado inteligente
 - Modo grados/radianes intercambiable
@@ -82,7 +82,8 @@ Calculadora Avanzada en Rust. Escribe 'help'. (Ctrl+D para salir)
 | `fmt`  | Alterna formato (Decimal / Científico) |
 | `vars` | Muestra todas las variables definidas |
 | `ayuda` | Muestra la ayuda de una funcion (ej: `ayuda cos`) |
-
+| `plot` | Genera un gráfico en modo texto en alta resolución (ej: `plot sin(x) -10 10`) |
+| `export` | Exporta el último plot generado a un fichero svg (ej: `export grafico.svg´) | 
 ### Comandos de Pila
 
 | Comando | Descripción |
@@ -113,16 +114,6 @@ Operaciones sobre todos los valores en la pila:
 | `clear` | Borra el historial del archivo |
 | `!!` | Repite la última expresión del historial |
 | `!N` | Repite la línea N del historial (1-indexado) |
-
-### Graficación
-
-```bash
-plot <expresiones> [xmin xmax] [ymin ymax] [ancho alto]
-
-```
-
-* **expresiones**: Una o más funciones separadas por `;` (ej: `sin(x);cos(x)`).
-* **rangos**: Opcionales para X e Y.
 
 ### Integración Numérica
 
@@ -407,7 +398,7 @@ POP -> 8 (size=2)
 
 ## Graficación
 
-La calculadora incluye un motor de renderizado dual (ASCII estándar y Braille de alta resolución) para visualizar funciones.
+La calculadora incluye un motor de renderizado dual (ASCII estándar y Braille de alta resolución) para visualizar funciones y un exportador a SVG 
 
 ### Sintaxis Completa
 
@@ -432,7 +423,12 @@ plot x^2;sqrt(x);log(x+1) 0 10 0 5
 plot t*cos(t);t*sin(t) 0 6.28 -10 10
 
 ```
+# Exportación a SVG
+Genera un gráfico en la terminal:  `plot sin(x) -10 10`
 
+Expórtalo a un archivo: `export seno.svg`
+
+Abre seno.svg con tu navegador (Chrome, Edge, Firefox) y verás la gráfica en alta resolución.
 ---
 
 ### API del Módulo
