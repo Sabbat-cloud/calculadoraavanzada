@@ -15,7 +15,7 @@ const CMD_HISTORY_FILE: &str = "historial_cmds.txt";
 
 // Lista de comandos REPL
 const COMMANDS: &[&str] = &[
-    "help", "exit", "new", "mode", "vars", "mem", "hist", "clear", "plot",
+    "help", "exit", "new", "mode", "vars", "mem", "hist", "clear", "plot", "export",
     "push", "pop", "dup", "swap", "clearstack", "mem", "sum", "avg", "min", "max", "std", "ayuda", "fmt",
     "integ", "deriv", "solve",
 ];
@@ -420,7 +420,7 @@ pub fn run() {
                 }
             }
 
-            s if s.starts_with("integ") => {
+            s if s.starts_with("integ ") => {
                 let args: Vec<&str> = s[6..].split_whitespace().collect();
                 if args.len() < 3 {
                     println!("Uso: integ <expr> <min> <max> [pasos]");
@@ -536,6 +536,18 @@ pub fn run() {
             s if s.starts_with("plot ") => {
                 calc.plot(&s[5..]);
             }
+            s if s.starts_with("export ") => {
+                let filename = s[7..].trim();
+                if filename.is_empty() {
+                    println!("Uso: export <nombre_archivo.svg>");
+                } else {
+                    match calc.export_svg(filename) {
+                        Ok(msg) => println!("{}", msg.green()),
+                        Err(e) => println!("Error exportando SVG: {}", e.red()),
+                    }
+                }
+            }
+
             s if s.starts_with("push ") => {
                 let rest = s[5..].trim();
                 let cleaned = rest.replace(',', " ");

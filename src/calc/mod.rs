@@ -19,6 +19,7 @@ pub struct Calculator {
     pub is_radians: bool,
     pub last_result: Complex64, // Cambio a Complex
     pub output_format: OutputFormat,
+    pub last_plot_cmd: String,
 }
 
 impl Calculator {
@@ -39,7 +40,8 @@ impl Calculator {
             is_radians: true, // Por defecto en Radianes
             last_result: Complex64::new(0.0, 0.0),
             // 3. Inicializamos en Decimal por defecto
-            output_format: OutputFormat::Decimal, 
+            output_format: OutputFormat::Decimal,
+            last_plot_cmd: String::new(),
         }
     }
 
@@ -58,6 +60,7 @@ impl Calculator {
         self.last_result = Complex64::new(0.0, 0.0);
         self.is_radians = true;
         self.output_format = OutputFormat::Decimal; // Reset también el formato
+        self.last_plot_cmd.clear();
     }
     
     pub(crate) fn parse_number_str(&self, s: &str) -> Result<Complex64, String> {

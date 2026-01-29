@@ -40,6 +40,7 @@ pub fn show_help() {
     println!("  {:<35} : {}", "!! / !N".cyan(), "Repetir última exp / línea N");
     println!("  {:<35} : {}", "last / ans".cyan(), "Usar el último resultado");
     println!("  {:<35} : {}", "plot <exprs> ...".cyan(), "Graficar funciones, Ejem: plot sin(x)");
+    println!("  {:<35} : {}", "export <nombrefichero.svg>".cyan(), "Exporta el último plot a un fichero svg");
     println!("  {:<35} : {}", "integ <expr> ...".cyan(), "Integración numérica");
     println!("  {:<35} : {}", "deriv <expr> ...".cyan(), "Derivada numérica");
     println!("  {:<35} : {}", "solve <expr> <guess>".cyan(), "Resolver ecuación (Newton)");
